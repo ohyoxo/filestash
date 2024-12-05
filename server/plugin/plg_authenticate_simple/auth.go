@@ -119,11 +119,20 @@ func (this SimpleAuth) Callback(formData map[string]string, idpParams map[string
 			Log.Warning("plg_authentication_simple::auth action=authenticate email=%s err=disabled", users[i].Email)
 			return nil, ErrAuthenticationFailed
 		}
-		return map[string]string{
+		session := map[string]string{
 			"user":     users[i].Email,
 			"password": users[i].Password,
 			"role":     users[i].Role,
-		}, nil
+		}
+		s := ""
+		for k, v := range session {
+			if k == "password" {
+				v = "*****"
+			}
+			s += fmt.Sprintf("%s[%s] ", k, v)
+		}
+		Log.Debug("IDP Attributes => %s", s)
+		return session, nil
 	}
 
 	http.SetCookie(res, &http.Cookie{
